@@ -8,19 +8,23 @@
   "description": "json api",
   "main": "app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "start-dev": "nodemon src/app.js",
+    "start": "nodemon src/app.js",
     "lint": "./node_modules/.bin/eslint ./src",
     "test": "echo \"Error: no test specified\" && exit 1",
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "**/src/*.{js,json,css,md}": ["prettier --write", "git add"]
+    "**/src/*.{js,json,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "author": "Denis Kutsokon <denis.kutsokon@gmail.com> (https://github.com/kutsokon)",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "joi": "^13.1.2",
+    "lodash": "^4.17.5"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
