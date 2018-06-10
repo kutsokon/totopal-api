@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 
-const leagues = express.Router();
+export const leagues = express.Router();
 
 leagues.get('/', (req, res) => {
   res.send('Hello world leagues');
 });
 
-module.exports = leagues;
+export default leagues;

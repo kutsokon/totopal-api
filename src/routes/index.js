@@ -1,15 +1,5 @@
-const express = require('express');
+import countries from '../countries/countries.route';
+import leagues from '../leagues/leagues.route';
 
-const router = express.Router();
-
-const countries = require('../countries/countries.route');
-const leagues = require('../leagues/leagues.route');
-
-router.use('/countries', countries);
-router.use('/leagues', leagues);
-
-router.get('/', (req, res) => {
-  res.send('Hello world');
-});
-
-module.exports = router;
+export const Routes = [countries, leagues];
+export default Routes;

@@ -1,5 +1,7 @@
-const Joi = require('joi');
-const _ = require('lodash');
+import Joi from 'joi';
+import _ from 'lodash';
+
+import Country from './countries.model';
 
 const countriesData = require('./countries.data');
 
@@ -26,12 +28,20 @@ function addCountry(req, res) {
     return;
   }
 
-  countriesData.push({
-    id: countriesData.length + 1,
-    name: result.name
+  const { name, leages } = result.value;
+  const newCountry = Country({
+    name,
+    leages
   });
 
-  res.send('Country');
+  // save the country
+  newCountry.save((err, doc) => {
+    if (err) {
+      res.status(404).send(err.message);
+    } else {
+      res.send(doc);
+    }
+  });
 }
 
 function updateCountry(req, res) {
@@ -56,9 +66,11 @@ function updateCountry(req, res) {
 
 function validateCountry(country) {
   const countrySchema = {
+    id: Joi.number(),
     name: Joi.string()
       .min(3)
-      .required()
+      .required(),
+    leages: Joi.number()
   };
 
   return Joi.validate(country, countrySchema);

@@ -21,4 +21,4 @@ const countries = [
   }
 ];
 
-module.exports = countries;
+export default countries;
