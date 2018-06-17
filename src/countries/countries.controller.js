@@ -1,29 +1,27 @@
 import Joi from 'joi';
-import _ from 'lodash';
 
 import Country from './countries.model';
+import logger from '../utils/logger';
 
-const countriesData = require('./countries.data');
-
-function getCountries(req, res) {
-  res.send(countriesData);
+// get -> /countries
+export function getCountries(req, res) {
+  Country.find()
+    .then((countries) => {
+      logger.info('All countries have been gotten');
+      res.send(countries);
+    })
+    .catch((error) => {
+      logger.error(error.message);
+      res.status(404).send(error.message);
+    });
 }
 
-function getCountry(req, res) {
-  const id = parseInt(req.params.id, 10);
-  const country = _.find(countriesData, { id });
-
-  if (!country) {
-    res.status(404).send('The country with given id is not available');
-  } else {
-    res.send(country);
-  }
-}
-
-function addCountry(req, res) {
+// get -> /countries/:id
+export function addCountry(req, res) {
   const result = validateCountry(req.body);
 
   if (result.error) {
+    logger.error(result.error.details[0].message);
     res.status(404).send(result.error.details[0].message);
     return;
   }
@@ -34,67 +32,92 @@ function addCountry(req, res) {
     leages
   });
 
-  // save the country
-  newCountry.save((err, doc) => {
-    if (err) {
-      res.status(404).send(err.message);
+  newCountry.save((error, country) => {
+    if (error) {
+      logger.error(error.message);
+      res.status(404).send(error.message);
     } else {
-      res.send(doc);
+      logger.info('New country was added');
+      res.send(country);
     }
   });
 }
 
-function updateCountry(req, res) {
-  const id = parseInt(req.params.id, 10);
-  const countryToUpdate = _.find(countriesData, { id });
+// post -> /countries
+export function getCountry(req, res) {
+  const { id } = req.params;
 
-  if (!countryToUpdate) {
-    res.status(404).send('Country with this id is not available');
-    return;
+  if (id) {
+    Country.findOne({ id })
+      .then((country) => {
+        logger.info('A country has been gotten');
+        res.send(country);
+      })
+      .catch((error) => {
+        logger.error(error.messag);
+        res.status(404).send(error.messag);
+      });
+  } else {
+    logger.error('Can`t get a country with such params');
+    res.status(404).send('Can`t get a country with such params');
   }
-
-  const { error } = validateCountry(req.body);
-
-  if (error) {
-    res.status(404).send(error.details[0].message);
-    return;
-  }
-
-  countryToUpdate.name = req.body.name;
-  res.send(countryToUpdate);
 }
 
-function validateCountry(country) {
+// put -> /countries/:id
+export function updateCountry(req, res) {
+  const result = validateCountry(req.body);
+
+  if (result.error) {
+    logger.error(result.error.details[0].message);
+    res.status(404).send(result.error.details[0].message);
+    return;
+  }
+
+  const countryData = result.value;
+
+  Country.findOneAndUpdate(
+    { id: countryData.id },
+    { name: countryData.name, leages: countryData.leages },
+    { upsert: true }
+  )
+    .then((country) => {
+      logger.info('Country has been updated');
+      res.send(country);
+    })
+    .catch((error) => {
+      logger.error(error.message);
+      res.status(404).send(error.message);
+    });
+}
+
+// delete -> /countries/:id
+export function removeCountry(req, res) {
+  const { id } = req.params;
+
+  if (id) {
+    Country.findOneAndRemove({ id })
+      .then((country) => {
+        logger.info('Country has been removed');
+        res.send(country);
+      })
+      .catch((error) => {
+        logger.error(error.message);
+        res.status(404).send(error.message);
+      });
+  } else {
+    logger.error('Country with this id is not available');
+    res.status(404).send('Country with this id is not available');
+  }
+}
+
+
+// validate request body
+export function validateCountry(country) {
   const countrySchema = {
-    id: Joi.number(),
-    name: Joi.string()
-      .min(3)
-      .required(),
+    id: Joi.number().required(),
+    name: Joi.string().min(3),
     leages: Joi.number()
   };
 
   return Joi.validate(country, countrySchema);
 }
-
-function removeCountry(req, res) {
-  const id = parseInt(req.params.id, 10);
-  const countryToRemove = _.find(countriesData, { id });
-
-  if (!countryToRemove) {
-    res.status(404).send('Country with this id is not available');
-    return;
-  }
-
-  const index = countriesData.indexOf(countryToRemove);
-  countriesData.splice(index, 1);
-
-  res.send(countryToRemove);
-}
-
-module.exports = {
-  getCountries,
-  getCountry,
-  addCountry,
-  updateCountry,
-  removeCountry
-};
