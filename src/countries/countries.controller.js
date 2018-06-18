@@ -16,7 +16,7 @@ export function getCountries(req, res) {
     });
 }
 
-// get -> /countries/:id
+// post -> /countries
 export function addCountry(req, res) {
   const result = validateCountry(req.body);
 
@@ -27,30 +27,26 @@ export function addCountry(req, res) {
   }
 
   const { name, leages } = result.value;
-  const newCountry = Country({
-    name,
-    leages
-  });
 
-  newCountry.save((error, country) => {
-    if (error) {
+  Country.findOneAndUpdate({ name }, { name, leages }, { upsert: true })
+    .then((country) => {
+      logger.info('Country has been created');
+      res.send(country);
+    })
+    .catch((error) => {
       logger.error(error.message);
       res.status(404).send(error.message);
-    } else {
-      logger.info('New country was added');
-      res.send(country);
-    }
-  });
+    });
 }
 
-// post -> /countries
+// get -> /countries/:id
 export function getCountry(req, res) {
   const { id } = req.params;
 
   if (id) {
-    Country.findOne({ id })
+    Country.findOne({ _id: id })
       .then((country) => {
-        logger.info('A country has been gotten');
+        logger.info('A country has been gotten', country);
         res.send(country);
       })
       .catch((error) => {
@@ -65,6 +61,7 @@ export function getCountry(req, res) {
 
 // put -> /countries/:id
 export function updateCountry(req, res) {
+  const { id } = req.params;
   const result = validateCountry(req.body);
 
   if (result.error) {
@@ -76,13 +73,13 @@ export function updateCountry(req, res) {
   const countryData = result.value;
 
   Country.findOneAndUpdate(
-    { id: countryData.id },
+    { _id: id },
     { name: countryData.name, leages: countryData.leages },
     { upsert: true }
   )
     .then((country) => {
       logger.info('Country has been updated');
-      res.send(country);
+      res.send('Country has been updated: ', country.name);
     })
     .catch((error) => {
       logger.error(error.message);
@@ -95,7 +92,7 @@ export function removeCountry(req, res) {
   const { id } = req.params;
 
   if (id) {
-    Country.findOneAndRemove({ id })
+    Country.findOneAndRemove({ _id: id })
       .then((country) => {
         logger.info('Country has been removed');
         res.send(country);
@@ -110,11 +107,9 @@ export function removeCountry(req, res) {
   }
 }
 
-
 // validate request body
 export function validateCountry(country) {
   const countrySchema = {
-    id: Joi.number().required(),
     name: Joi.string().min(3),
     leages: Joi.number()
   };
