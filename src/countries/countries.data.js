@@ -2,22 +2,22 @@ const countries = [
   {
     id: 1,
     name: 'England',
-    leages: 5
+    leages: [101, 102, 103]
   },
   {
     id: 2,
     name: 'Spain',
-    leages: 4
+    leages: [201, 202]
   },
   {
     id: 3,
     name: 'France',
-    leages: 2
+    leages: [301, 302]
   },
   {
     id: 4,
     name: 'Germany',
-    leages: 2
+    leages: [401, 402]
   }
 ];
 
