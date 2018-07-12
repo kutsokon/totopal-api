@@ -1,8 +1,14 @@
 import mongoose, { Schema } from 'mongoose';
 
 const CountrySchema = new Schema({
-  name: String,
-  leages: Number
+  name: {
+    type: String,
+    required: true
+  },
+  leages: {
+    type: [Number],
+    required: true
+  }
 });
 
 const Country = mongoose.model('Country', CountrySchema);

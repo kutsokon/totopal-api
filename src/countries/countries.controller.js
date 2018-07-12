@@ -111,7 +111,7 @@ export function removeCountry(req, res) {
 export function validateCountry(country) {
   const countrySchema = {
     name: Joi.string().min(3),
-    leages: Joi.number()
+    leages: [Joi.number()]
   };
 
   return Joi.validate(country, countrySchema);
