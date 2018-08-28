@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const mongoURI = 'mongodb://localhost:27017/totopal';
 
-mongoose.connect(mongoURI);
+mongoose.connect(mongoURI, { useNewUrlParser: true });
 mongoose.connection.on('error', (err) => {
   logger.error(err.message);
   logger.info('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'));

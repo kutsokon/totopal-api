@@ -10,7 +10,7 @@ const LeagueSchema = new Schema({
     required: true
   },
   teams: {
-    type: [Number],
+    type: [String],
     required: true
   }
 });

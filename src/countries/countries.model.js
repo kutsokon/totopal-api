@@ -5,8 +5,8 @@ const CountrySchema = new Schema({
     type: String,
     required: true
   },
-  leages: {
-    type: [Number],
+  leagues: {
+    type: [String],
     required: true
   }
 });
