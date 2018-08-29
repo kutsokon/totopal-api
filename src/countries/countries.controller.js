@@ -1,7 +1,6 @@
-import Joi from 'joi';
-
 import Country from './countries.model';
 import logger from '../utils/logger';
+import { validateCountry } from '../utils/vaidation';
 
 // get -> /countries
 export function getCountries(req, res) {
@@ -95,14 +94,4 @@ export function removeCountry(req, res) {
       logger.error(error.message);
       res.status(404).send(error.message);
     });
-}
-
-// validate request body
-export function validateCountry(country) {
-  const countrySchema = {
-    name: Joi.string().min(3).required(),
-    leagues: Joi.array().items(Joi.number())
-  };
-
-  return Joi.validate(country, countrySchema);
 }

@@ -1,7 +1,6 @@
-import Joi from 'joi';
-
 import League from './leagues.model';
 import Country from '../countries/countries.model';
+import { validateLeague } from '../utils/vaidation';
 import logger from '../utils/logger';
 
 // get -> /leagues
@@ -92,12 +91,4 @@ export function removeLeague(req, res) {
   });
 }
 
-function validateLeague(league) {
-  const leagueSchema = {
-    name: Joi.string().required(),
-    country: Joi.string().required(),
-    teams: Joi.array().items(Joi.number())
-  };
 
-  return Joi.validate(league, leagueSchema);
-}
