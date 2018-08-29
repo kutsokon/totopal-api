@@ -3,31 +3,35 @@ import Country from '../countries/countries.model';
 import { validateLeague } from '../utils/vaidation';
 import logger from '../utils/logger';
 
-// get -> /leagues
+// GET -> /leagues
 export function getLeagues(req, res) {
-  League.find().then((leagues) => {
-    logger.info('All leagues have been gotten');
-    res.send(leagues);
-  }).catch((error) => {
-    logger.error(error.message);
-    res.status(404).send(error.message);
-  });
+  League.find()
+    .then(leagues => {
+      logger.info('All leagues have been got');
+      res.send(leagues);
+    })
+    .catch(error => {
+      logger.error(error.message);
+      res.status(404).send(error.message);
+    });
 }
 
-// get -> /leagues/:id
+// GET -> /leagues/:id
 export function getLeague(req, res) {
   const { id } = req.params;
 
-  League.findOne({ _id: id }).then((league) => {
-    logger.info('A country has been gotten');
-    res.send(league);
-  }).catch((error) => {
-    logger.error(error.message);
-    res.status(404).send(error.message);
-  });
+  League.findOne({ _id: id })
+    .then(league => {
+      logger.info('A country has been gotten');
+      res.send(league);
+    })
+    .catch(error => {
+      logger.error(error.message);
+      res.status(404).send(error.message);
+    });
 }
 
-// post -> /leagues
+// POST -> /leagues
 export function addLeague(req, res) {
   const result = validateLeague(req.body);
 
@@ -40,23 +44,25 @@ export function addLeague(req, res) {
   const { name, country, teams } = result.value;
 
   League.findOneAndUpdate({ name }, { name, country, teams }, { upsert: true, new: true })
-    .then((league) => {
+    .then(league => {
       // add a league to an existing country
       Country.findOneAndUpdate({ name: country }, { $push: { leagues: league._id } })
         .then(() => {
-          logger.error('League was created and pushed to corresponding country');
+          logger.error('League has been created and pushed to corresponding country');
           res.send(league);
-        }).catch((error) => {
+        })
+        .catch(error => {
           logger.error(error.message);
           res.status(404).send(error.message);
         });
-    }).catch((error) => {
+    })
+    .catch(error => {
       logger.error(error.message);
       res.status(404).send(error.message);
     });
 }
 
-// put -> /leagues/:id
+// PUT -> /leagues/:id
 export function updateLeague(req, res) {
   const { id } = req.params;
   const result = validateLeague(req.body);
@@ -69,26 +75,36 @@ export function updateLeague(req, res) {
 
   const { name, country, teams } = result.value;
 
-  League.findOneAndUpdate({ _id: id }, { name, country, teams }, { upsert: true }).then(() => {
-    logger.info('A league was updated');
-    res.send('A league has been updated');
-  }).catch((error) => {
-    logger.error(error.message);
-    res.status(404).send(error.message);
-  });
+  League.findOneAndUpdate({ _id: id }, { name, country, teams }, { upsert: true, new: true })
+    .then(league => {
+      logger.info('A league has been updated');
+      res.send(league);
+    })
+    .catch(error => {
+      logger.error(error.message);
+      res.status(404).send(error.message);
+    });
 }
 
-// remove -> /leagues/:id
+// REMOVE -> /leagues/:id
 export function removeLeague(req, res) {
   const { id } = req.params;
 
-  League.findOneAndRemove({ _id: id }).then((league) => {
-    logger.info('A league was removed');
-    res.send(league);
-  }).catch((error) => {
-    logger.error(error.message);
-    res.status(404).send(error.message);
-  });
+  League.findOneAndRemove({ _id: id })
+    .then(league => {
+      // remove league id from country collection
+      Country.findOneAndUpdate({ name: league.country }, { $pullAll: { leagues: [league._id] } })
+        .then(() => {
+          logger.info('A league has been removed');
+          res.send('A league has been removed');
+        })
+        .catch(error => {
+          logger.error(error.message);
+          res.status(404).send(error.message);
+        });
+    })
+    .catch(error => {
+      logger.error(error.message);
+      res.status(404).send(error.message);
+    });
 }
-
-
