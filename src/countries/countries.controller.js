@@ -1,17 +1,18 @@
+import Joi from 'joi';
+
 import Country from './countries.model';
 import logger from '../utils/logger';
-import { validateCountry } from '../utils/vaidation';
 
 // GET -> /countries
 export function getCountries(req, res) {
   Country.find()
     .then(countries => {
       logger.info('All countries have been got');
-      res.send(countries);
+      res.json({ data: { countries } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -21,12 +22,12 @@ export function getCountry(req, res) {
 
   Country.findOne({ _id: id })
     .then(country => {
-      logger.info('A country has been got', country);
-      res.send(country);
+      logger.info('A country has been got');
+      res.json({ data: { country } });
     })
     .catch(error => {
       logger.error(error.messag);
-      res.status(404).send(error.messag);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -36,20 +37,24 @@ export function addCountry(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).send(result.error.details[0].message);
+    res.status(404).json({ message: result.error.details[0].message });
     return;
   }
 
   const { name, leagues } = result.value;
 
-  Country.findOneAndUpdate({ name }, { name, leagues }, { upsert: true, new: true })
-    .then(country => {
-      logger.info('A country has been created', country);
-      res.send(country);
+  new Country({
+    name,
+    leagues
+  })
+    .save()
+    .then(() => {
+      logger.info('A country has been created');
+      res.json({ message: 'A country has been created' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -60,24 +65,20 @@ export function updateCountry(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).send(result.error.details[0].message);
+    res.status(404).json({ message: result.error.details[0].message });
     return;
   }
 
   const { name, leagues } = result.value;
 
-  Country.findOneAndUpdate(
-    { _id: id },
-    { name: name, leagues: leagues },
-    { upsert: true, new: true }
-  )
-    .then(country => {
-      logger.info('A country has been updated', country);
-      res.send(country);
+  Country.findOneAndUpdate({ _id: id }, { name: name, leagues: leagues })
+    .then(() => {
+      logger.info('A country has been updated');
+      res.json({ message: 'A country has been updated' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -88,10 +89,21 @@ export function removeCountry(req, res) {
   Country.findOneAndRemove({ _id: id })
     .then(() => {
       logger.info('A country has been removed');
-      res.send('A country has been removed');
+      res.json({ message: 'A country has been removed' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
+}
+
+function validateCountry(country) {
+  const countrySchema = {
+    name: Joi.string()
+      .min(3)
+      .required(),
+    leagues: Joi.array().items(Joi.number())
+  };
+
+  return Joi.validate(country, countrySchema);
 }

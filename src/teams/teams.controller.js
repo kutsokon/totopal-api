@@ -1,6 +1,7 @@
+import Joi from 'joi';
+
 import Team from './team.model';
 import League from '../leagues/leagues.model';
-import { validateTeam } from '../utils/vaidation';
 import logger from '../utils/logger';
 
 // get -> /teams
@@ -8,11 +9,11 @@ export function getTeams(req, res) {
   Team.find()
     .then(teams => {
       logger.info('All teams have been gotten');
-      res.send(teams);
+      res.json({ data: { teams } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -23,11 +24,11 @@ export function getTeam(req, res) {
   Team.findOne({ _id: id })
     .then(team => {
       logger.info('A team has been gotten');
-      res.send(team);
+      res.json({ data: { team } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -37,32 +38,31 @@ export function addTeam(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).send(result.error.details[0].message);
+    res.status(404).json({ message: result.error.details[0].message });
     return;
   }
 
   const { name, league, year, coach, players } = result.value;
 
-  Team.findOneAndUpdate(
-    { name },
-    { name, league, year, coach, players },
-    { upsert: true, new: true }
-  )
+  new Team({
+    name,
+    league,
+    year,
+    coach,
+    players
+  })
+    .save()
     .then(team => {
       // add a league to an existing country
-      League.findOneAndUpdate({ name: league }, { $push: { teams: team._id } })
-        .then(() => {
-          logger.error('A team has been created and pushed to corresponding league');
-          res.send(team);
-        })
-        .catch(error => {
-          logger.error(error.message);
-          res.status(404).send(error.message);
-        });
+      return League.findOneAndUpdate({ name: league }, { $push: { teams: team._id } });
+    })
+    .then(() => {
+      logger.error('A team has been created and pushed to corresponding league');
+      res.json({ message: 'A team has been created and pushed to corresponding league' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -73,24 +73,20 @@ export function updateTeam(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).send(result.error.details[0].message);
+    res.status(404).json({ message: result.error.details[0].message });
     return;
   }
 
   const { name, league, year, coach, players } = result.value;
 
-  Team.findOneAndUpdate(
-    { _id: id },
-    { name, league, year, coach, players },
-    { upsert: true, new: true }
-  )
-    .then(team => {
+  Team.findOneAndUpdate({ _id: id }, { name, league, year, coach, players })
+    .then(() => {
       logger.info('A team has been updated');
-      res.send(team);
+      res.json({ message: 'A team has been updated' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
 }
 
@@ -100,18 +96,26 @@ export function removeTeam(req, res) {
 
   Team.findOneAndRemove({ _id: id })
     .then(team => {
-      League.findOneAndUpdate({ name: team.league }, { $pullAll: { teams: [team._id] } })
-        .then(() => {
-          logger.info('A team has been removed');
-          res.send('A team has been removed');
-        })
-        .catch(error => {
-          logger.error(error.message);
-          res.status(404).send(error.message);
-        });
+      return League.findOneAndUpdate({ name: team.league }, { $pullAll: { teams: [team._id] } });
+    })
+    .then(() => {
+      logger.info('A team has been removed');
+      res.json({ message: 'A team has been removed' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).send(error.message);
+      res.status(404).json({ message: error.message });
     });
+}
+
+export function validateTeam(team) {
+  const teamSchema = {
+    name: Joi.string().required(),
+    league: Joi.string().required(),
+    year: Joi.number().required(),
+    coach: Joi.string().required(),
+    players: Joi.array().items(Joi.string())
+  };
+
+  return Joi.validate(team, teamSchema);
 }

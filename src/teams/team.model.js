@@ -3,7 +3,8 @@ import mongoose, { Schema } from 'mongoose';
 const TeamSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   league: {
     type: String,
