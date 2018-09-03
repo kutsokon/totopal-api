@@ -21,6 +21,7 @@
   "author": "Denis Kutsokon <denis.kutsokon@gmail.com> (https://github.com/kutsokon)",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^3.0.0",
     "chalk": "^2.4.1",
     "cors": "^2.8.4",
     "express": "^4.16.2",
