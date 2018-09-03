@@ -9,11 +9,11 @@ export function getTeams(req, res) {
   Team.find()
     .then(teams => {
       logger.info('All teams have been gotten');
-      res.json({ data: { teams } });
+      res.status(200).json({ data: { teams } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -24,11 +24,11 @@ export function getTeam(req, res) {
   Team.findOne({ _id: id })
     .then(team => {
       logger.info('A team has been gotten');
-      res.json({ data: { team } });
+      res.status(200).json({ data: { team } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -38,7 +38,7 @@ export function addTeam(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).json({ message: result.error.details[0].message });
+    res.status(404).json({ message: 'Wrong parameters' });
     return;
   }
 
@@ -58,11 +58,13 @@ export function addTeam(req, res) {
     })
     .then(() => {
       logger.error('A team has been created and pushed to corresponding league');
-      res.json({ message: 'A team has been created and pushed to corresponding league' });
+      res
+        .status(200)
+        .json({ message: 'A team has been created and pushed to corresponding league' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -73,7 +75,7 @@ export function updateTeam(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).json({ message: result.error.details[0].message });
+    res.status(404).json({ message: 'Wrong parameters' });
     return;
   }
 
@@ -82,11 +84,11 @@ export function updateTeam(req, res) {
   Team.findOneAndUpdate({ _id: id }, { name, league, year, coach, players })
     .then(() => {
       logger.info('A team has been updated');
-      res.json({ message: 'A team has been updated' });
+      res.status(201).json({ message: 'A team has been updated' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -100,11 +102,11 @@ export function removeTeam(req, res) {
     })
     .then(() => {
       logger.info('A team has been removed');
-      res.json({ message: 'A team has been removed' });
+      res.status(200).json({ message: 'A team has been removed' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 

@@ -8,11 +8,11 @@ export function getCountries(req, res) {
   Country.find()
     .then(countries => {
       logger.info('All countries have been got');
-      res.json({ data: { countries } });
+      res.status(200).json({ data: { countries } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -23,11 +23,11 @@ export function getCountry(req, res) {
   Country.findOne({ _id: id })
     .then(country => {
       logger.info('A country has been got');
-      res.json({ data: { country } });
+      res.status(200).json({ data: { country } });
     })
     .catch(error => {
-      logger.error(error.messag);
-      res.status(404).json({ message: error.message });
+      logger.error(error.message);
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -37,7 +37,7 @@ export function addCountry(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).json({ message: result.error.details[0].message });
+    res.status(404).json({ message: 'Wrong parameters' });
     return;
   }
 
@@ -50,11 +50,11 @@ export function addCountry(req, res) {
     .save()
     .then(() => {
       logger.info('A country has been created');
-      res.json({ message: 'A country has been created' });
+      res.status(201).json({ message: 'A country has been created' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -65,7 +65,7 @@ export function updateCountry(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).json({ message: result.error.details[0].message });
+    res.status(404).json({ message: 'Wrong parameters' });
     return;
   }
 
@@ -74,11 +74,11 @@ export function updateCountry(req, res) {
   Country.findOneAndUpdate({ _id: id }, { name: name, leagues: leagues })
     .then(() => {
       logger.info('A country has been updated');
-      res.json({ message: 'A country has been updated' });
+      res.status(200).json({ message: 'A country has been updated' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -89,11 +89,11 @@ export function removeCountry(req, res) {
   Country.findOneAndRemove({ _id: id })
     .then(() => {
       logger.info('A country has been removed');
-      res.json({ message: 'A country has been removed' });
+      res.status(200).json({ message: 'A country has been removed' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 

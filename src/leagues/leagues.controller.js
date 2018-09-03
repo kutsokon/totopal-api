@@ -9,11 +9,11 @@ export function getLeagues(req, res) {
   League.find()
     .then(leagues => {
       logger.info('All leagues have been got');
-      res.json({ data: { leagues } });
+      res.status(200).json({ data: { leagues } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -24,11 +24,11 @@ export function getLeague(req, res) {
   League.findOne({ _id: id })
     .then(league => {
       logger.info('A country has been gotten');
-      res.json({ data: { league } });
+      res.status(200).json({ data: { league } });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -38,7 +38,7 @@ export function addLeague(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).json({ message: result.error.details[0].message });
+    res.status(404).json({ message: 'Wrong parameters' });
     return;
   }
 
@@ -56,11 +56,13 @@ export function addLeague(req, res) {
     })
     .then(() => {
       logger.error('League has been created and pushed to corresponding country');
-      res.json({ message: 'League has been created and pushed to corresponding country' });
+      res
+        .status(201)
+        .json({ message: 'League has been created and pushed to corresponding country' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -71,7 +73,7 @@ export function updateLeague(req, res) {
 
   if (result.error) {
     logger.error(result.error.details[0].message);
-    res.status(404).json({ message: result.error.details[0].message });
+    res.status(404).json({ message: 'Wrong parameters' });
     return;
   }
 
@@ -80,11 +82,11 @@ export function updateLeague(req, res) {
   League.findOneAndUpdate({ _id: id }, { name, country, teams })
     .then(() => {
       logger.info('A league has been updated');
-      res.json({ message: 'A league has been updated' });
+      res.status(201).json({ message: 'A league has been updated' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
@@ -102,11 +104,11 @@ export function removeLeague(req, res) {
     })
     .then(() => {
       logger.info('A league has been removed');
-      res.json({ message: 'A league has been removed' });
+      res.status(200).json({ message: 'A league has been removed' });
     })
     .catch(error => {
       logger.error(error.message);
-      res.status(404).json({ message: error.message });
+      res.status(404).json({ message: 'Not found' });
     });
 }
 
