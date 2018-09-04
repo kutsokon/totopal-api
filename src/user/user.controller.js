@@ -54,7 +54,7 @@ export function logIn(req, res) {
             },
             process.env.JWT_KEY,
             {
-              expiresIn: '1h'
+              expiresIn: process.env.JWT_EXP
             }
           );
           res.status(200).json({ message: 'Auth successful!', token });

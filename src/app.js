@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 
-import { modifyErrorMessage, errorHandler } from './routes/error';
+import Routes, { formErrorMessage, errorHandler } from './routes';
 import { connectToDatabaseWithRetry } from './db';
 import logger from './utils/logger';
 

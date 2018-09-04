@@ -4,5 +4,6 @@ import leagues from '../leagues/leagues.route';
 import teams from '../teams/teams.route';
 
 export const Routes = [user, countries, leagues, teams];
+export * from './error';
 
 export default Routes;

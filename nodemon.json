@@ -1,5 +1,7 @@
 {
   "env": {
-    "JWT_KEY": "secret"
+    "PORT": 3000,
+    "JWT_KEY": "secret",
+    "JWT_EXP": 3600
   }
 }
