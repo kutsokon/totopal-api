@@ -6,14 +6,8 @@ const LeagueSchema = new Schema({
     required: true,
     unique: true
   },
-  country: {
-    type: String,
-    required: true
-  },
-  teams: {
-    type: [String],
-    required: true
-  }
+  country: { type: mongoose.Schema.Types.ObjectId, ref: 'Country' },
+  teams: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }]
 });
 
 const League = mongoose.model('League', LeagueSchema);

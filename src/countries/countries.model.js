@@ -6,10 +6,7 @@ const CountrySchema = new Schema({
     required: true,
     unique: true
   },
-  leagues: {
-    type: [String],
-    required: true
-  }
+  leagues: [{ type: mongoose.Schema.Types.ObjectId, ref: 'League' }]
 });
 
 const Country = mongoose.model('Country', CountrySchema);

@@ -6,9 +6,16 @@ import logger from '../utils/logger';
 // GET -> /countries
 export function getCountries(req, res) {
   Country.find()
+    .populate('leagues')
+    .exec()
     .then(countries => {
-      logger.info('All countries have been got');
-      res.status(200).json({ data: { countries } });
+      if (countries) {
+        logger.info('All countries have been got');
+        res.status(200).json({ data: { countries } });
+      } else {
+        logger.error('All countries not found');
+        res.status(404).json({ message: 'Not found' });
+      }
     })
     .catch(error => {
       logger.error(error.message);
@@ -21,9 +28,16 @@ export function getCountry(req, res) {
   const { id } = req.params;
 
   Country.findOne({ _id: id })
+    .populate('leagues')
+    .exec()
     .then(country => {
-      logger.info('A country has been got');
-      res.status(200).json({ data: { country } });
+      if (country) {
+        logger.info('A country has been got');
+        res.status(200).json({ data: { country } });
+      } else {
+        logger.error('A country not found');
+        res.status(404).json({ message: 'Not found' });
+      }
     })
     .catch(error => {
       logger.error(error.message);
@@ -69,9 +83,9 @@ export function updateCountry(req, res) {
     return;
   }
 
-  const { name, leagues } = result.value;
+  const { name } = result.value;
 
-  Country.findOneAndUpdate({ _id: id }, { name: name, leagues: leagues })
+  Country.findOneAndUpdate({ _id: id }, { name: name })
     .then(() => {
       logger.info('A country has been updated');
       res.status(200).json({ message: 'A country has been updated' });

@@ -8,8 +8,13 @@ import logger from '../utils/logger';
 export function getTeams(req, res) {
   Team.find()
     .then(teams => {
-      logger.info('All teams have been gotten');
-      res.status(200).json({ data: { teams } });
+      if (teams) {
+        logger.info('All teams have been gotten');
+        res.status(200).json({ data: { teams } });
+      } else {
+        logger.error('All teams not found');
+        res.status(404).json({ message: 'Not found' });
+      }
     })
     .catch(error => {
       logger.error(error.message);
@@ -23,8 +28,13 @@ export function getTeam(req, res) {
 
   Team.findOne({ _id: id })
     .then(team => {
-      logger.info('A team has been gotten');
-      res.status(200).json({ data: { team } });
+      if (team) {
+        logger.info('A team has been gotten');
+        res.status(200).json({ data: { team } });
+      } else {
+        logger.error('A team not found');
+        res.status(404).json({ message: 'Not found' });
+      }
     })
     .catch(error => {
       logger.error(error.message);
@@ -42,25 +52,32 @@ export function addTeam(req, res) {
     return;
   }
 
-  const { name, league, year, coach, players } = result.value;
+  const { name, leagueName, year, coach, players } = result.value;
 
-  new Team({
-    name,
-    league,
-    year,
-    coach,
-    players
-  })
-    .save()
-    .then(team => {
-      // add a league to an existing country
-      return League.findOneAndUpdate({ name: league }, { $push: { teams: team._id } });
-    })
-    .then(() => {
-      logger.error('A team has been created and pushed to corresponding league');
-      res
-        .status(200)
-        .json({ message: 'A team has been created and pushed to corresponding league' });
+  League.findOne({ name: leagueName })
+    .then(league => {
+      new Team({
+        name,
+        league: league._id,
+        year,
+        coach,
+        players
+      })
+        .save()
+        .then(team => {
+          league.teams.push(team._id);
+          return league.save();
+        })
+        .then(() => {
+          logger.error('A team has been created and pushed to corresponding league');
+          res
+            .status(200)
+            .json({ message: 'A team has been created and pushed to corresponding league' });
+        })
+        .catch(error => {
+          logger.error(error.message);
+          res.status(404).json({ message: 'Not found' });
+        });
     })
     .catch(error => {
       logger.error(error.message);
@@ -79,12 +96,12 @@ export function updateTeam(req, res) {
     return;
   }
 
-  const { name, league, year, coach, players } = result.value;
+  const { name, year, coach, players } = result.value;
 
-  Team.findOneAndUpdate({ _id: id }, { name, league, year, coach, players })
+  Team.findOneAndUpdate({ _id: id }, { name, year, coach, players })
     .then(() => {
       logger.info('A team has been updated');
-      res.status(201).json({ message: 'A team has been updated' });
+      res.status(200).json({ message: 'A team has been updated' });
     })
     .catch(error => {
       logger.error(error.message);
@@ -98,7 +115,7 @@ export function removeTeam(req, res) {
 
   Team.findOneAndRemove({ _id: id })
     .then(team => {
-      return League.findOneAndUpdate({ name: team.league }, { $pullAll: { teams: [team._id] } });
+      return League.findOneAndUpdate({ _id: team.league }, { $pullAll: { teams: [team._id] } });
     })
     .then(() => {
       logger.info('A team has been removed');
@@ -113,7 +130,7 @@ export function removeTeam(req, res) {
 export function validateTeam(team) {
   const teamSchema = {
     name: Joi.string().required(),
-    league: Joi.string().required(),
+    leagueName: Joi.string().required(),
     year: Joi.number().required(),
     coach: Joi.string().required(),
     players: Joi.array().items(Joi.string())

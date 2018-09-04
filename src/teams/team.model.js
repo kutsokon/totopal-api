@@ -7,8 +7,8 @@ const TeamSchema = new Schema({
     unique: true
   },
   league: {
-    type: String,
-    required: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'League'
   },
   year: {
     type: Number,
